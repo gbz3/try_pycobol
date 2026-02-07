@@ -2,6 +2,7 @@
 """
 テスト用バイナリデータを生成するスクリプト
 parse_binary.py で解析可能なフォーマットでデータを生成
+ゾーン10進数（Zoned Decimal）にも対応
 """
 import sys
 import struct
@@ -9,8 +10,61 @@ import argparse
 import random
 
 # レコードフォーマット（parse_binary.pyと同じ）
-RECORD_FORMAT = '>ifH10s'
+RECORD_FORMAT = '>ifH10s8s'
 RECORD_SIZE = struct.calcsize(RECORD_FORMAT)
+
+
+def encode_zoned_decimal(value, length=8):
+    """
+    整数値をゾーン10進数（Zoned Decimal）にエンコード
+    
+    ゾーン10進数形式:
+    - 各バイトの下位4ビット（ニブル）が数字（0-9）
+    - 最後のバイトの上位4ビット（ゾーン）が符号
+      - 0xC: 正の数
+      - 0xD: 負の数
+      - 0xF: 通常のゾーン（符号なし）
+    
+    Args:
+        value: エンコードする整数値
+        length: バイト長（デフォルト: 8）
+    
+    Returns:
+        bytes: ゾーン10進数のバイト列
+    
+    Raises:
+        ValueError: 値がバイト長に収まらない場合
+    """
+    # 符号を判定
+    is_negative = value < 0
+    abs_value = abs(value)
+    
+    # 数字列に変換（ゼロ埋め）
+    digits_str = str(abs_value).zfill(length)
+    
+    if len(digits_str) > length:
+        raise ValueError(f"値 {value} は {length} バイトに収まりません")
+    
+    # ゾーン10進数バイト列を生成
+    zoned_bytes = bytearray()
+    
+    for i, digit_char in enumerate(digits_str):
+        digit = int(digit_char)
+        
+        # 最後のバイト: 符号ゾーンを設定
+        if i == len(digits_str) - 1:
+            if is_negative:
+                zone = 0xD  # 負の数
+            else:
+                zone = 0xC  # 正の数
+        else:
+            zone = 0xF  # 通常のゾーン
+        
+        # ゾーン（上位4ビット）と数字（下位4ビット）を結合
+        byte = (zone << 4) | digit
+        zoned_bytes.append(byte)
+    
+    return bytes(zoned_bytes)
 
 
 def generate_record(record_num):
@@ -29,8 +83,12 @@ def generate_record(record_num):
     short_value = record_num % 65536  # unsigned shortの範囲内
     string_value = f"REC{record_num:06d}".encode('utf-8')[:10].ljust(10, b'\x00')
     
+    # ゾーン10進数: record_numの10倍（正負を交互に）
+    zoned_value = record_num * 10 if record_num % 2 == 0 else -(record_num * 10)
+    zoned_bytes = encode_zoned_decimal(zoned_value, length=8)
+    
     # バイナリデータにパック
-    packed_data = struct.pack(RECORD_FORMAT, integer_value, float_value, short_value, string_value)
+    packed_data = struct.pack(RECORD_FORMAT, integer_value, float_value, short_value, string_value, zoned_bytes)
     
     return packed_data
 
@@ -55,8 +113,12 @@ def generate_random_record(record_num):
     random_str = ''.join(random.choice(chars) for _ in range(random.randint(5, 10)))
     string_value = random_str.encode('utf-8')[:10].ljust(10, b'\x00')
     
+    # ランダムなゾーン10進数（-99999999 ～ 99999999）
+    zoned_value = random.randint(-99999999, 99999999)
+    zoned_bytes = encode_zoned_decimal(zoned_value, length=8)
+    
     # バイナリデータにパック
-    packed_data = struct.pack(RECORD_FORMAT, integer_value, float_value, short_value, string_value)
+    packed_data = struct.pack(RECORD_FORMAT, integer_value, float_value, short_value, string_value, zoned_bytes)
     
     return packed_data
 

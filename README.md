@@ -55,44 +55,46 @@ COBOL の Copybook 解析は、以下の理由で「これ一つでOK」とい�
 (.venv) $ python generate_binary.py -n 5 |hexdump -C
 === バイナリデータ生成開始 ===
 レコード数: 5
-レコードサイズ: 20バイト
-総データサイズ: 100バイト (0.00 MB)
-フォーマット: >ifH10s
+レコードサイズ: 28バイト
+総データサイズ: 140バイト (0.00 MB)
+フォーマット: >ifH10s8s
 ランダムデータ: 無効
 
 
 === 生成完了 ===
 00000000  00 00 00 01 3f c0 00 00  00 01 52 45 43 30 30 30  |....?.....REC000|
-00000010  30 30 31 00 00 00 00 02  40 40 00 00 00 02 52 45  |001.....@@....RE|
-00000020  43 30 30 30 30 30 32 00  00 00 00 03 40 90 00 00  |C000002.....@...|
-00000030  00 03 52 45 43 30 30 30  30 30 33 00 00 00 00 04  |..REC000003.....|
-00000040  40 c0 00 00 00 04 52 45  43 30 30 30 30 30 34 00  |@.....REC000004.|
-00000050  00 00 00 05 40 f0 00 00  00 05 52 45 43 30 30 30  |....@.....REC000|
-00000060  30 30 35 00                                       |005.|
-00000064
+00000010  30 30 31 00 f0 f0 f0 f0  f0 f0 f1 d0 00 00 00 02  |001.............|
+00000020  40 40 00 00 00 02 52 45  43 30 30 30 30 30 32 00  |@@....REC000002.|
+00000030  f0 f0 f0 f0 f0 f0 f2 c0  00 00 00 03 40 90 00 00  |............@...|
+00000040  00 03 52 45 43 30 30 30  30 30 33 00 f0 f0 f0 f0  |..REC000003.....|
+00000050  f0 f0 f3 d0 00 00 00 04  40 c0 00 00 00 04 52 45  |........@.....RE|
+00000060  43 30 30 30 30 30 34 00  f0 f0 f0 f0 f0 f0 f4 c0  |C000004.........|
+00000070  00 00 00 05 40 f0 00 00  00 05 52 45 43 30 30 30  |....@.....REC000|
+00000080  30 30 35 00 f0 f0 f0 f0  f0 f0 f5 d0              |005.........|
+0000008c
 ```
 
 ```
 # 解析結果
 (.venv) $ python generate_binary.py -n 5 |python parse_binary.py 
 === レコード解析開始 ===
-レコードサイズ: 20バイト
-フォーマット: >ifH10s
+レコードサイズ: 28バイト
+フォーマット: >ifH10s8s
 
 === バイナリデータ生成開始 ===
 レコード数: 5
-レコードサイズ: 20バイト
-総データサイズ: 100バイト (0.00 MB)
-フォーマット: >ifH10s
+レコードサイズ: 28バイト
+総データサイズ: 140バイト (0.00 MB)
+フォーマット: >ifH10s8s
 ランダムデータ: 無効
 
 
 === 生成完了 ===
-{'integer_value': 1, 'float_value': 1.5, 'short_value': 1, 'string_value': 'REC000001', 'record_number': 1}
-{'integer_value': 2, 'float_value': 3.0, 'short_value': 2, 'string_value': 'REC000002', 'record_number': 2}
-{'integer_value': 3, 'float_value': 4.5, 'short_value': 3, 'string_value': 'REC000003', 'record_number': 3}
-{'integer_value': 4, 'float_value': 6.0, 'short_value': 4, 'string_value': 'REC000004', 'record_number': 4}
-{'integer_value': 5, 'float_value': 7.5, 'short_value': 5, 'string_value': 'REC000005', 'record_number': 5}
+{'integer_value': 1, 'float_value': 1.5, 'short_value': 1, 'string_value': 'REC000001', 'zoned_decimal': -10, 'zoned_decimal_hex': 'f0f0f0f0f0f0f1d0', 'record_number': 1}
+{'integer_value': 2, 'float_value': 3.0, 'short_value': 2, 'string_value': 'REC000002', 'zoned_decimal': 20, 'zoned_decimal_hex': 'f0f0f0f0f0f0f2c0', 'record_number': 2}
+{'integer_value': 3, 'float_value': 4.5, 'short_value': 3, 'string_value': 'REC000003', 'zoned_decimal': -30, 'zoned_decimal_hex': 'f0f0f0f0f0f0f3d0', 'record_number': 3}
+{'integer_value': 4, 'float_value': 6.0, 'short_value': 4, 'string_value': 'REC000004', 'zoned_decimal': 40, 'zoned_decimal_hex': 'f0f0f0f0f0f0f4c0', 'record_number': 4}
+{'integer_value': 5, 'float_value': 7.5, 'short_value': 5, 'string_value': 'REC000005', 'zoned_decimal': -50, 'zoned_decimal_hex': 'f0f0f0f0f0f0f5d0', 'record_number': 5}
 
 === 解析完了 ===
 総レコード数: 5
