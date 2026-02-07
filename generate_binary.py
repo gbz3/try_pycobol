@@ -80,8 +80,8 @@ def encode_zoned_decimal(value, length=8):
 def generate_header_record():
     """ヘッダレコードを生成"""
     record_type = RECORD_TYPE_HEADER
-    created_date = datetime.now().strftime('%Y%m%d').encode('utf-8')
-    system_id = b'TESTSYS001'
+    created_date = datetime.now().strftime('%Y%m%d').encode('cp932')
+    system_id = 'TESTSYS001'.encode('cp932').ljust(10, b'\x00')
     reserved = b'\x00' * 50
     
     return struct.pack(HEADER_FORMAT, record_type, created_date, system_id, reserved)
@@ -104,15 +104,28 @@ def generate_data_record(record_num, random_data=False):
         integer_value = random.randint(-2147483648, 2147483647)
         float_value = random.uniform(-1000.0, 1000.0)
         short_value = random.randint(0, 65535)
-        chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-        random_str = ''.join(random.choice(chars) for _ in range(random.randint(5, 10)))
-        string_value = random_str.encode('utf-8')[:10].ljust(10, b'\x00')
+        # 半角カナを含むランダム文字列
+        kana_chars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ'
+        ascii_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        # 半角カナと英数字を混ぜる
+        if random.random() < 0.5:
+            random_str = ''.join(random.choice(kana_chars) for _ in range(random.randint(3, 6)))
+        else:
+            random_str = ''.join(random.choice(ascii_chars) for _ in range(random.randint(5, 10)))
+        string_value = random_str.encode('cp932')[:10].ljust(10, b'\x00')
         zoned_value = random.randint(-99999999, 99999999)
     else:
         integer_value = record_num
         float_value = record_num * 1.5
         short_value = record_num % 65536
-        string_value = f"REC{record_num:06d}".encode('utf-8')[:10].ljust(10, b'\x00')
+        # レコード番号によって半角カナと英数字を使い分け
+        if record_num % 3 == 0:
+            # 半角カナのテストデータ
+            kana_samples = ['ﾃｽﾄ', 'ｻﾝﾌﾟﾙ', 'ﾃﾞｰﾀ', 'ｶﾅ', 'ﾚｺｰﾄﾞ']
+            kana_str = kana_samples[(record_num // 3) % len(kana_samples)] + f"{record_num:02d}"
+            string_value = kana_str.encode('cp932')[:10].ljust(10, b'\x00')
+        else:
+            string_value = f"REC{record_num:06d}".encode('cp932')[:10].ljust(10, b'\x00')
         zoned_value = record_num * 10 if record_num % 2 == 0 else -(record_num * 10)
     
     zoned_bytes = encode_zoned_decimal(zoned_value, length=8)

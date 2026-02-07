@@ -100,8 +100,8 @@ def parse_header_record(data):
     return {
         'record_type': 'HEADER',
         'record_type_code': values[0].decode('ascii'),
-        'created_date': values[1].decode('utf-8', errors='ignore').rstrip('\x00'),
-        'system_id': values[2].decode('utf-8', errors='ignore').rstrip('\x00'),
+        'created_date': values[1].decode('cp932', errors='ignore').rstrip('\x00'),
+        'system_id': values[2].decode('cp932', errors='ignore').rstrip('\x00'),
         'reserved': values[3].hex()[:20] + '...',  # 最初の10バイト分のみ表示
     }, HEADER_SIZE
 
@@ -122,7 +122,7 @@ def parse_data_record(data):
         'integer_value': values[1],
         'float_value': values[2],
         'short_value': values[3],
-        'string_value': values[4].decode('utf-8', errors='ignore').rstrip('\x00'),
+        'string_value': values[4].decode('cp932', errors='ignore').rstrip('\x00'),
         'zoned_decimal': zoned_value,
         'zoned_decimal_hex': values[5].hex(),
     }, DATA_SIZE
