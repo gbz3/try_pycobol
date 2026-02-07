@@ -7,6 +7,7 @@
 """
 import sys
 import struct
+import json
 
 # レコード区分（ASCII文字）
 RECORD_TYPE_HEADER = b'1'
@@ -276,8 +277,8 @@ def main():
         for parsed_data in process_stream_chunked(sys.stdin.buffer, chunk_size=1024*1024):
             record_count += 1
             
-            # 結果を出力
-            print(parsed_data)
+            # 結果をJSON形式で出力
+            print(json.dumps(parsed_data, ensure_ascii=False, indent=2))
             
             # 進捗表示（10000レコードごと）
             if record_count % 10000 == 0:

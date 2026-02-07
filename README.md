@@ -87,7 +87,7 @@ COBOL の Copybook 解析は、以下の理由で「これ一つでOK」とい�
 
 ```
 # 解析結果
-(.venv) $ python generate_binary.py -n 5 |python parse_binary.py 
+(.venv) $ python generate_binary.py -n 5 |python parse_binary.py
 === レコード解析開始 ===
 ヘッダレコードサイズ: 69バイト
 データレコードサイズ: 29バイト
@@ -101,15 +101,146 @@ COBOL の Copybook 解析は、以下の理由で「これ一つでOK」とい�
 
 
 === 生成完了 ===
-{'record_type': 'HEADER', 'record_type_code': '1', 'created_date': '20260207', 'system_id': 'TESTSYS001', 'reserved': '00000000000000000000...', 'record_number': 1}
-{'record_type': 'DATA', 'record_type_code': '2', 'integer_value': 1, 'float_value': 1.5, 'short_value': 1, 'string_value': 'REC000001', 'zoned_decimal': -10, 'zoned_decimal_hex': 'f0f0f0f0f0f0f1d0', 'record_number': 2}
-{'record_type': 'DATA', 'record_type_code': '2', 'integer_value': 2, 'float_value': 3.0, 'short_value': 2, 'string_value': 'REC000002', 'zoned_decimal': 20, 'zoned_decimal_hex': 'f0f0f0f0f0f0f2c0', 'record_number': 3}
-{'record_type': 'DATA', 'record_type_code': '2', 'integer_value': 3, 'float_value': 4.5, 'short_value': 3, 'string_value': 'ｻﾝﾌﾟﾙ03', 'zoned_decimal': -30, 'zoned_decimal_hex': 'f0f0f0f0f0f0f3d0', 'record_number': 4}
-{'record_type': 'DATA', 'record_type_code': '2', 'integer_value': 4, 'float_value': 6.0, 'short_value': 4, 'string_value': 'REC000004', 'zoned_decimal': 40, 'zoned_decimal_hex': 'f0f0f0f0f0f0f4c0', 'record_number': 5}
-{'record_type': 'DATA', 'record_type_code': '2', 'integer_value': 5, 'float_value': 7.5, 'short_value': 5, 'string_value': 'REC000005', 'zoned_decimal': -50, 'zoned_decimal_hex': 'f0f0f0f0f0f0f5d0', 'record_number': 6}
-{'record_type': 'TRAILER', 'record_type_code': '8', 'record_count': 5, 'total_amount': -30, 'total_amount_hex': 'f0f0f0f0f0f0f3d0', 'reserved': '00000000000000000000...', 'record_number': 7}
-{'record_type': 'END', 'record_type_code': '9', 'end_code': 0, 'reserved': '00000000000000000000...', 'record_number': 8}
+{
+  "record_type": "HEADER",
+  "record_type_code": "1",
+  "created_date": "20260207",
+  "system_id": "TESTSYS001",
+  "reserved": "00000000000000000000...",
+  "record_number": 1
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 1,
+  "float_value": 1.5,
+  "short_value": 1,
+  "string_value": "REC000001",
+  "zoned_decimal": -10,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f1d0",
+  "record_number": 2
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 2,
+  "float_value": 3.0,
+  "short_value": 2,
+  "string_value": "REC000002",
+  "zoned_decimal": 20,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f2c0",
+  "record_number": 3
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 3,
+  "float_value": 4.5,
+  "short_value": 3,
+  "string_value": "ｻﾝﾌﾟﾙ03",
+  "zoned_decimal": -30,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f3d0",
+  "record_number": 4
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 4,
+  "float_value": 6.0,
+  "short_value": 4,
+  "string_value": "REC000004",
+  "zoned_decimal": 40,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f4c0",
+  "record_number": 5
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 5,
+  "float_value": 7.5,
+  "short_value": 5,
+  "string_value": "REC000005",
+  "zoned_decimal": -50,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f5d0",
+  "record_number": 6
+}
+{
+  "record_type": "TRAILER",
+  "record_type_code": "8",
+  "record_count": 5,
+  "total_amount": -30,
+  "total_amount_hex": "f0f0f0f0f0f0f3d0",
+  "reserved": "00000000000000000000...",
+  "record_number": 7
+}
+{
+  "record_type": "END",
+  "record_type_code": "9",
+  "end_code": 0,
+  "reserved": "00000000000000000000...",
+  "record_number": 8
+}
 
 === 解析完了 ===
 総レコード数: 8
+```
+
+```
+# jq でフィルタ
+python generate_binary.py -n 5 2>/dev/null |python parse_binary.py 2>/dev/null |jq -s '.[] | select(.record_type == "DATA")'
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 1,
+  "float_value": 1.5,
+  "short_value": 1,
+  "string_value": "REC000001",
+  "zoned_decimal": -10,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f1d0",
+  "record_number": 2
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 2,
+  "float_value": 3.0,
+  "short_value": 2,
+  "string_value": "REC000002",
+  "zoned_decimal": 20,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f2c0",
+  "record_number": 3
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 3,
+  "float_value": 4.5,
+  "short_value": 3,
+  "string_value": "ｻﾝﾌﾟﾙ03",
+  "zoned_decimal": -30,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f3d0",
+  "record_number": 4
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 4,
+  "float_value": 6.0,
+  "short_value": 4,
+  "string_value": "REC000004",
+  "zoned_decimal": 40,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f4c0",
+  "record_number": 5
+}
+{
+  "record_type": "DATA",
+  "record_type_code": "2",
+  "integer_value": 5,
+  "float_value": 7.5,
+  "short_value": 5,
+  "string_value": "REC000005",
+  "zoned_decimal": -50,
+  "zoned_decimal_hex": "f0f0f0f0f0f0f5d0",
+  "record_number": 6
+}
 ```
